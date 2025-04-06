@@ -2,19 +2,20 @@ import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import './styles.css';
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000';
+
 const App = () => {
   const [showOptions, setShowOptions] = useState(false);
   const [showUploadPage, setShowUploadPage] = useState(false);
   const [uploadStatus, setUploadStatus] = useState('');
   const [file, setFile] = useState(null);
   const [uploadedFileName, setUploadedFileName] = useState(null);
-  const [isProcessing, setIsProcessing] = useState(false);  // To track processing state
-  const [progress, setProgress] = useState(0); // To track progress bar
-  const [currentStep, setCurrentStep] = useState(""); // To show the current step message
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [currentStep, setCurrentStep] = useState("");
   const optionsRef = useRef(null);
   const [status, setStatus] = useState("");
   const [downloadUrl, setDownloadUrl] = useState("");
-  
 
   const handleGetStartedClick = () => {
     setShowOptions(true);
@@ -30,7 +31,7 @@ const App = () => {
     };
 
     try {
-      const response = await axios.post('http://localhost:8000/submit-role', payload);
+      const response = await axios.post(`${API_BASE_URL}/submit-role`, payload);
       if (response.status === 200) {
         setShowOptions(false);
         setShowUploadPage(true);
@@ -73,7 +74,7 @@ const App = () => {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:8000/upload', {
+      const response = await fetch(`${API_BASE_URL}/upload`, {
         method: 'POST',
         body: formData,
       });
@@ -93,35 +94,35 @@ const App = () => {
 
   const handleViewInsightsClick = () => {
     if (!uploadedFileName) return;
-  
+
     setIsProcessing(true);
     setProgress(0);
     setCurrentStep("⏳ Starting analysis...");
-  
-    const eventSource = new EventSource(`http://localhost:8000/get-insights-progress/${uploadedFileName}`);
-  
+
+    const eventSource = new EventSource(`${API_BASE_URL}/get-insights-progress/${uploadedFileName}`);
+
     eventSource.onmessage = function (event) {
       try {
         const data = JSON.parse(event.data);
-  
+
         if (data.progress) {
           setProgress(data.progress);
         }
-  
+
         if (data.status) {
           setCurrentStep(data.status);
         }
-  
+
         if (data.progress === 100 && data.filename) {
-          const downloadUrl = `http://localhost:8000/download-report/${data.filename}`;
-  
+          const downloadUrl = `${API_BASE_URL}/download-report/${data.filename}`;
+
           const a = document.createElement('a');
           a.href = downloadUrl;
-          a.download = 'Business_Intelligence_Report.pdf'; // Optional: force name
+          a.download = 'Business_Intelligence_Report.pdf';
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
-  
+
           eventSource.close();
           setIsProcessing(false);
           setCurrentStep("✅ Download should begin automatically.");
@@ -133,7 +134,7 @@ const App = () => {
         setIsProcessing(false);
       }
     };
-  
+
     eventSource.onerror = (err) => {
       console.error("SSE connection error:", err);
       setCurrentStep("❌ Connection error.");
@@ -141,9 +142,6 @@ const App = () => {
       setIsProcessing(false);
     };
   };
-  
-  
-  
 
   useEffect(() => {
     if (showOptions && optionsRef.current) {
