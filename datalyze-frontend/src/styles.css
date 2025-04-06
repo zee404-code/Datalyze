@@ -1,0 +1,253 @@
+@import url('https://fonts.googleapis.com/css2?family=Amatic+SC&display=swap');
+
+/* Reset default styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Full-screen layout with cream background */
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-height: 100vh;  /* Ensures the body takes full height */
+    font-size: 4vw;  /* Default font-size based on viewport width */
+    background-color: #FFF5E1; /* Cream color */
+    font-family: 'Amatic SC', sans-serif;
+    position: relative;
+    margin: 0;
+}
+
+/* Content container to stack elements vertically and center them */
+.content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;  /* Prevent overflow */
+    width: 100%;  /* Ensure it takes full width */
+    height: auto;
+    margin-bottom: 5vh;
+}
+
+/* Center the h1 with appropriate size */
+h1 {
+    font-size: clamp(8vw, 12vw, 18vw);  /* Ensures h1 stays within a certain range */
+    padding: 0;
+    font-family: 'Amatic SC', sans-serif;
+    max-width: 100%; /* Prevents overflow */
+    white-space: nowrap; /* Prevents text from wrapping */
+    overflow: hidden;
+}
+
+/* Image container to maintain size relative to screen */
+.image-container {
+    margin-top: 0.01vh;
+    width: 90vw;
+    max-width: 1200px;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/* Image styling to ensure it scales properly */
+.image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+
+
+/* Description and tagline adjustment */
+.description, .tagline {
+    margin-top: 0.05vh; /* Slight space after the image */
+}
+
+/* Button styling */
+button {
+    margin-top: 3vh; /* Add margin space above button */
+    padding: 12px 40px;  /* Button size */
+    background-color: black;  /* Black background */
+    color: white;  /* White text */
+    font-size: 3vw;  /* Font size based on viewport */
+    font-weight: bold;  /* Bold text */
+    font-family: 'Amatic SC', sans-serif;  /* Apply Amatic SC font */
+    border: none;  /* Remove border */
+    border-radius: 5px;  /* Rounded corners */
+    cursor: pointer;  /* Pointer cursor on hover */
+    transition: background-color 0.3s, transform 0.2s;  /* Smooth transition for hover effects */
+    max-width: 600px; /* Ensure button doesn't grow too large */
+}
+
+/* Button hover effect */
+button:hover {
+    background-color: darkgray;  /* Darken background on hover */
+    transform: scale(1.05);  /* Slightly enlarge button on hover */
+}
+
+/* Adjustments for smaller screens */
+@media (max-width: 1024px) {
+    .image-container {
+        max-height: 35vh; /* Reduce max-height for smaller screens */
+        max-width: 70vw; /* Reduce max-width for better proportion */
+    }
+
+    .image {
+        max-height: 35vh;  /* Ensure image height remains within the limit */
+        max-width: 70vw;  /* Ensure width doesn't grow too large */
+    }
+
+    h1 {
+        font-size: clamp(12vw, 14vw, 20vw);  /* Adjust h1 size for medium screens */
+    }
+
+    button {
+        font-size: 32px;  /* Adjust button font size */
+        padding: 18px 35px;  /* Adjust button padding */
+    }
+}
+
+@media (max-width: 768px) {
+    .image-container {
+        max-height: 30vh; /* Reduce max-height for better control */
+        max-width: 80vw; /* Increase width slightly */
+    }
+
+    .image {
+        max-height: 30vh;  /* Reduce height further for smaller screens */
+        max-width: 80vw;  /* Adjust width accordingly */
+    }
+
+    h1 {
+        font-size: clamp(16vw, 18vw, 22vw);  /* Increase h1 size on smaller screens */
+    }
+
+    button {
+        font-size: 28px;  /* Adjust button font size */
+        padding: 15px 30px;  /* Adjust button padding */
+    }
+}
+
+@media (max-width: 480px) {
+    .image-container {
+        max-height: 25vh; /* Reduce max-height further */
+        max-width: 90vw;  /* Increase width slightly */
+    }
+
+    .image {
+        max-height: 25vh;  /* Keep height under control */
+        max-width: 90vw;  /* Maintain responsive scaling */
+    }
+
+    h1 {
+        font-size: clamp(20vw, 22vw, 24vw);  /* Make h1 larger on smaller screens */
+    }
+
+    button {
+        font-size: 24px;  /* Adjust button font size */
+        padding: 12px 25px;  /* Adjust button padding */
+    }
+}
+
+
+
+/* Ensure the new options container is displayed correctly */
+#newOptions {
+    display: none;  /* Initially hidden */
+    flex-wrap: wrap;  /* Wrap the tiles */
+    justify-content: space-evenly;  /* Evenly space the tiles */
+    align-items: center;  /* Vertically center the items */
+    padding: 20px;  /* Add some padding around the options */
+}
+
+.option-tile {
+    flex-basis: 45%;  /* Fixed width for each option tile */
+    height: 200px;  /* Fixed height */
+    background-color: #F0F0F0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+    margin: 10px;  /* Space between tiles */
+}
+
+/* Hover effect for option tiles */
+.option-tile:hover {
+    background-color: #FFD700;  /* Change background on hover */
+    transform: scale(1.05);  /* Slightly enlarge the tile on hover */
+}
+
+/* Style for option text */
+.option-text {
+    font-family: 'Amatic SC', sans-serif;
+    font-size: 48px;  /* Adjust text size */
+    text-align: center;
+    color: #333;  /* Dark color for text */
+}
+
+/* Hidden class for hiding elements */
+.hidden {
+    display: none;
+}
+
+#uploadButton {
+    padding: 8px 16px;  /* Adjusts padding around the text to make the button thinner */
+    font-size: 14px;     /* Reduces font size to make the button more compact */
+    background-color: black;  /* A sample green background, adjust as needed */
+    color: white;        /* White text */
+    border: none;        /* No border */
+    border-radius: 4px;  /* Rounded corners, adjust as needed */
+    cursor: pointer;     /* Pointer cursor on hover */
+    transition: background-color 0.3s ease;  /* Smooth background transition */
+  }
+  
+  #uploadButton:hover {
+    background-color: darkgray; /* Darker shade of green when hovered */
+  }
+
+  #insightButton {
+    padding: 8px 16px;  /* Adjusts padding around the text to make the button thinner */
+    font-size: 20px;     /* Reduces font size to make the button more compact */
+    background-color: black;  /* A sample green background, adjust as needed */
+    color: white;        /* White text */
+    border: none;        /* No border */
+    border-radius: 4px;  /* Rounded corners, adjust as needed */
+    cursor: pointer;     /* Pointer cursor on hover */
+    transition: background-color 0.3s ease;  /* Smooth background transition */
+  }
+  
+  #insightButton:hover {
+    background-color: darkgray; /* Darker shade of green when hovered */
+  }
+  
+  .progress-container {
+    width: 100%;
+    margin-top: 20px;
+  }
+  
+  .progress-bar {
+    width: 100%;
+    height: 20px;
+    background-color: #f3f3f3;
+    border-radius: 10px;
+    margin-top: 10px;
+  }
+  
+  .progress {
+    height: 100%;
+    background-color: #4caf50;
+    border-radius: 10px;
+    transition: width 0.5s ease-in-out;
+  }
+  
