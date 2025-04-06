@@ -9,6 +9,8 @@ import asyncio
 import json
 import uuid
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 from dataprocessing import *  # custom functions
 # NOTE: `select_persona`, `persona`, `detect_data_domain`, etc. must be defined in dataprocessing.py

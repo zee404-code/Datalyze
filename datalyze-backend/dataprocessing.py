@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 import ollama
+import os
+import requests
 from sklearn.impute import KNNImputer, SimpleImputer
 #from fancyimpute import IterativeImputer  # MICE
 from sklearn.linear_model import LinearRegression
@@ -15,6 +17,9 @@ from scipy.stats import shapiro, ttest_ind, f_oneway, chi2_contingency
 from statsmodels.stats.multicomp import pairwise_tukeyhsd
 import chardet
 import io
+from dotenv import load_dotenv
+load_dotenv()
+
 persona = 'DA'; #default choice
 explanation_log = [] #BO
 stats_log =[] #DA
@@ -58,62 +63,67 @@ def select_persona(p):
 def detect_data_domain(df):
     """Detects the domain of the dataset and provides a response."""
     try:
-        # Check if dataframe is empty
         if df.empty:
             return "❌ The dataset is empty. Please upload a valid dataset."
 
-        # Extract columns and sample data for prompt
         columns = df.columns.tolist()
         sample_data = df.head(3).to_string()
 
         prompt = f"""
-        You are NexBI, an intelligent BI consultant. Your task is to identify the domain of the dataset and provide a confident, professional, and engaging response.
+You are NexBI, an intelligent BI consultant. Your task is to identify the domain of the dataset and provide a confident, professional, and engaging response.
 
-        ### Task:
-        1. Identify the domain of the dataset based on column names.
-        2. Mention key columns that helped you determine the domain.
-        3. Provide a brief explanation (1-2 sentences) of what this dataset is used for.
-        4. End with a natural follow-up question to guide the user forward.
+### Task:
+1. Identify the domain of the dataset based on column names.
+2. Mention key columns that helped you determine the domain.
+3. Provide a brief explanation (1–2 sentences) of what this dataset is used for.
+4. End with a natural follow-up question to guide the user forward.
 
-        ### Format:
-        1. Concise and to the point.
-        2. Avoid unnecessary details.
-        3. Focus on essential columns and insights.
-        4. Make the response sound human, approachable, and professional.
-        5. End with a question that invites further exploration.
+### Examples:
+#### Input:
+Columns: ['Order ID', 'Customer Name', 'Product Category', 'Sales Amount']
+#### Output:
+"This is a sales dataset. The columns ‘Order ID,’ ‘Customer Name,’ and ‘Sales Amount’ suggest it tracks customer purchases and sales performance. Would you like to explore sales trends or customer demographics?"
 
-        ### Examples:
-        #### Input:
-        Columns: ['Order ID', 'Customer Name', 'Product Category', 'Sales Amount']
-        #### Output:
-        "This is a sales dataset. The columns ‘Order ID,’ ‘Customer Name,’ and ‘Sales Amount’ suggest it tracks customer purchases and sales performance. Would you like to explore sales trends or customer demographics?"
+#### Input:
+Columns: ['Transaction ID', 'Account Balance', 'Expense Category']
+#### Output:
+"This appears to be a financial dataset. The columns ‘Transaction ID,’ ‘Account Balance,’ and ‘Expense Category’ suggest it's tracking financial transactions. Would you like me to check for spending patterns?"
 
-        #### Input:
-        Columns: ['Transaction ID', 'Account Balance', 'Expense Category']
-        #### Output:
-        "This appears to be a financial dataset. The columns ‘Transaction ID,’ ‘Account Balance,’ and ‘Expense Category’ suggest it's tracking financial transactions. Would you like me to check for spending patterns?"
+#### Input:
+Columns: ['Patient ID', 'Diagnosis Code', 'Treatment Plan']
+#### Output:
+"This is a healthcare dataset. Columns like ‘Patient ID,’ ‘Diagnosis Code,’ and ‘Treatment Plan’ suggest it tracks patient medical information. Should I look for missing data or analyze treatment outcomes?"
 
-        #### Input:
-        Columns: ['Patient ID', 'Diagnosis Code', 'Treatment Plan']
-        #### Output:
-        "This is a healthcare dataset. Columns like ‘Patient ID,’ ‘Diagnosis Code,’ and ‘Treatment Plan’ suggest it tracks patient medical information. Should I look for missing data or analyze treatment outcomes?"
+### Now, analyze the following dataset:
+Column Names: {columns}
+Sample Data: {sample_data}
+"""
 
-        ### Now, analyze the following dataset:
-        Column Names: {columns}
-        Sample Data: {sample_data}
-        """
+        headers = {
+            "Authorization": f"Bearer {os.getenv('TOGETHER_API_KEY')}",
+            "Content-Type": "application/json"
+        }
 
-        response = ollama.chat(model="mistral", messages=[{"role": "user", "content": prompt}])
-        domain = response["message"]["content"].strip()
+        data = {
+            "model": "mistralai/Mistral-7B-Instruct-v0.1",
+            "messages": [
+                {"role": "user", "content": prompt}
+            ],
+            "max_tokens": 3072,
+            "temperature": 0.7,
+            "top_p": 0.9
+        }
+
+        response = requests.post("https://api.together.xyz/v1/chat/completions", headers=headers, json=data)
+        result = response.json()
+
+        domain = result.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
 
         if not domain:
             return "❌ Unable to detect the domain of the dataset. Please check the dataset for sufficient information."
-        #explanation_log.append("Detecting Data Domain..." + domain + "\n")
-        #stats_log.append("Detecting Data Domain..." + domain + "\n")
-        #domainText.append("Detecting Data Domain..." + domain + "\n")
-        dom = domain
+
         return domain
-    
+
     except Exception as e:
         return f"❌ Error while detecting domain: {str(e)}"
     
@@ -946,29 +956,41 @@ from fpdf import FPDF
 def generate_bi_report(df, log, domain):
     columns = df.columns.tolist()
     dataset = df.head(3).to_string()
-    
-    # Define the prompts for Business Owner and Data Analyst personas
+
     prompt = f"""
-        Act as an experienced Business Intelligence Consultant analyzing a dataset from the {domain} domain. Here is a small sample of the dataset, {dataset} along with column names {columns} You are presenting findings to key stakeholders, ensuring insights are tailored, relevant, and directly tied to their business objectives. Your responses should be structured as a professional, engaging conversation—avoid sounding scripted or generic. Instead, provide actionable, data-driven recommendations and discuss potential business impacts.
+Act as an experienced Business Intelligence Consultant analyzing a dataset from the {domain} domain. Here is a small sample of the dataset: {dataset}, along with column names: {columns}. You are presenting findings to key stakeholders, ensuring insights are tailored, relevant, and directly tied to their business objectives.
 
-        The raw insights are:
-        {log}
+The raw insights are:
+{log}
 
-        Rewrite these insights to:
+Rewrite these insights to:
+- Sound like a human, expert consultant delivering them in a direct stakeholder conversation.
+- Contextualize each insight based on the dataset's domain and typical business concerns in this industry.
+- Highlight key trends, anomalies, and their possible business implications.
+- Offer practical recommendations in a structured yet engaging manner.
+- Use a confident, consultative tone—avoid robotic or overly technical phrasing unless needed for clarity.
+"""
 
-        Sound like a human, expert consultant delivering them in a direct stakeholder conversation.
-        Contextualize each insight based on the dataset's domain and typical business concerns in this industry.
-        Highlight key trends, anomalies, and their possible business implications.
-        Offer practical recommendations in a structured yet engaging manner.
-        Use a confident, consultative tone—avoid robotic or overly technical phrasing unless needed for clarity.
-        Your response should make the insights sound natural, persuasive, and highly relevant to business decision-makers.
-        
-        """
-    
+    headers = {
+        "Authorization": f"Bearer {os.getenv('TOGETHER_API_KEY')}",
+        "Content-Type": "application/json"
+    }
 
-    response = ollama.chat(model="mistral", messages=[{"role": "user", "content": prompt}])
-    report = response["message"]["content"].strip()
-    
+    data = {
+        "model": "mistralai/Mistral-7B-Instruct-v0.1",
+        "messages": [
+            {"role": "user", "content": prompt}
+        ],
+        "max_tokens": 2048,  # you can tune this if you need longer responses
+        "temperature": 0.7,
+        "top_p": 0.9
+    }
+
+    response = requests.post("https://api.together.xyz/v1/chat/completions", headers=headers, json=data)
+    result = response.json()
+
+    report = result.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
+
     return report
 
 
