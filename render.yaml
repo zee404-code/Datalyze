@@ -2,8 +2,9 @@ services:
   - type: web
     name: datalyze-frontend
     env: node
+    rootDir: datalyze-frontend
     buildCommand: npm install && npm run build
-    startCommand: npm run serve
+    startCommand: npx serve -s build
     envVars:
       - key: NODE_VERSION
         value: 18
