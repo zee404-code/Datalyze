@@ -202,9 +202,6 @@ tenacity==9.0.0
 tensor==0.3.6
 tensorboard==2.13.0
 tensorboard-data-server==0.7.2
-tensorflow-estimator==2.13.0
-tensorflow==2.13.0
-tensorflow-probability==0.21.0
 Teras==0.2.0
 termcolor==2.4.0
 terminado==0.18.1
