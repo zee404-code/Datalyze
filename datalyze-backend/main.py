@@ -125,3 +125,7 @@ async def download_report(filename: str):
 
     # Serve the file to the client for download
     return FileResponse(path=filepath, filename=filename, media_type='application/pdf')
+
+@app.get("/health")
+async def health_check():
+    return {"status": "✅ OK", "message": "Backend is alive"}
